@@ -6,4 +6,4 @@ In order to run the scheme, one needs to have all files in the same folder. Then
 g++ scheme.cpp MasterSecretKey.cpp MasterPublicKey.cpp KeyPair.cpp  my_utilities.cpp -lsodium -lcryptopp -lpthread
 ./a.out
 
-The main functions is located in scheme.cpp, which is run.
+The function "main" is located in scheme.cpp, which is run.
