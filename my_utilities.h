@@ -38,4 +38,9 @@ Integer babyStepGiantStep(const Integer& alpha, const Integer& beta, const Integ
 // Function that checks if an integer is probable prime using the Miller Rabin test
 bool isProbablePrime(const Integer& n, int k); 
 
+// Function that checks if all the elements of a vector are strictly smaller than a given bound
+bool isVectorInBound(vector<Integer> vec, unsigned long long int bound);
+
+// Computes the scalar product of two vectors of the same size
+Integer scalarProduct(vector<Integer> v1, vector<Integer> v2);
 #endif

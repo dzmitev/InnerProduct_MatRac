@@ -1,116 +1,57 @@
+//
 // KeyPair.cpp
-
-#include <iostream>
-#include <iomanip>
-#include <bitset>
-#include <vector>
-#include <random>
-#include <crypto++/nbtheory.h>
-#include <crypto++/integer.h>
-#include <crypto++/osrng.h>
-#include <sodium.h>
-#include <sstream>
-
+//
+//#include <crypto++/integer.h>
+//#include <vector>
 #include "KeyPair.h"
 #include "my_utilities.h"
-using namespace std;
-using namespace CryptoPP;
+#include "MasterPublicKey.h"
+#include "MasterSecretKey.h"
 
-// random_device rd;
-// mt19937_64 gen(rd());
-// AutoSeededRandomPool rng;
-
-
-KeyPair::KeyPair(int length, int bits, Integer p) 
+KeyPair::KeyPair(int length, int bits, Integer p)
 {
-    // Initialize publicKey and privateKey arrays
     vector<Integer> publicKey;
     vector<Integer> privateKey;
     Integer g = generatorOfQuadraticResidues(p);
-    Integer q = (p-1) / 2;
-    //check that p is indeed a safe prime
-    /*cout << "first probable prime check" << endl;
-    if(isProbablePrime(p, 64) == false)
+    Integer q = (p - 1) / 2;
+    for (int i = 0; i < length; i++)
     {
-        throw invalid_argument("The input is not prime!");
-    }
-    cout << "second probable prime check" << endl;
-    if(isProbablePrime( ((p-1) / 2), 64) == false)
-    {
-        throw invalid_argument("The input is not safe prime!");
-    }*/
-
-    cout << "constructing keys" << endl;
-    for (int i = 0; i < length; i++) 
-    {
-        cout << "i = " << i << endl;
+        //cout << "i = " << i << endl;
+        //secretKey.push_back(generateCryptoSecureRandomInteger(bits).Modulo(q));
+        //Integer sk_i = generateCryptoSecureRandomInteger(bits).Modulo(q);
         privateKey.push_back(generateCryptoSecureRandomInteger(bits).Modulo(q));
         publicKey.push_back(a_exp_b_mod_c(g, privateKey[i], p));
-        //cout << privateKey[i] << ";;;" << publicKey[i] << endl;
     }
-    //publicKey.resize(l);
-    //privateKey.resize(l);
-    
-    cout << "setting the attributes" << endl;
 
-    this->l = length;
-    this->p = p;
-    this->g = g;
-    this->publicKey = publicKey;
-    this->privateKey = privateKey;
+    //MasterPublicKey mpk1(p, g, publicKey);
+    //MasterSecretKey msk1(secretKey);
+
+    this->length = length;
+    //this->mpk = mpk1;
+    //this->msk = msk1;
+    this->mpk = MasterPublicKey(p, g, publicKey);
+    this->msk = MasterSecretKey(privateKey);
 }
 
-KeyPair::KeyPair(int length, int bits) 
+KeyPair::KeyPair(int length, int bits)
 {
-    // generate a safe prime and use the previous constructor
-    //AutoSeededRandomPool rng;
-    cout << "generating a prime!" << endl;
     PrimeAndGenerator pg(1, rng, bits);
-    Integer p = pg.Prime();
-    //cout << "before calling the first constructor" << endl;
+    Integer p = pg.Prime(); // Retrieve the prime from PrimeAndGenerator
+    // Now, call the other constructor with the retrieved prime
     *this = KeyPair(length, bits, p);
 }
 
-//destructor
-KeyPair::~KeyPair()
+const MasterPublicKey& KeyPair::getMasterPublicKey() const
 {
-    // Release dynamically allocated resources
-    // Example: if publicKey and privateKey are dynamically allocated vectors
-    // delete them in the destructor
-
-    // delete[] publicKey;
-    // delete[] privateKey;
+    return this->mpk;
 }
 
+const MasterSecretKey& KeyPair::getMasterSecretKey() const
+{
+    return this->msk;
+}
 
-// getter methods
 int KeyPair::getLength() const
 {
-    return this->l;
-}
-
-const Integer& KeyPair::getSafePrime() const
-{
-    return this->p;
-}
-
-const Integer& KeyPair::getGenerator() const
-{
-    return this->g;
-}
-
-const vector<Integer>& KeyPair::getPublicKey() const
-{
-    return this->publicKey;
-}
-
-const vector<Integer>& KeyPair::getPrivateKey() const 
-{
-    return this->privateKey;
-}
-
-Integer KeyPair::getSubPrime() const
-{
-    Integer q = (this->p - 1) / 2;
-    return q;
+    return this->length;
 }

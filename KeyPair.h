@@ -1,41 +1,31 @@
+//
+// NewKey.h
+//
 #pragma once
+#ifndef IP2_KEYPAIR_H
+#define IP2_KEYPAIR_H
 
-#include <iostream>
-#include <iomanip>
-#include <bitset>
-#include <vector>
-#include <random>
-#include <crypto++/nbtheory.h>
-#include <crypto++/integer.h>
-#include <crypto++/osrng.h>
-#include <sodium.h>
-#include <sstream>
 
-using namespace std;
-using namespace CryptoPP;
+#include "MasterPublicKey.h"
+#include "MasterSecretKey.h"
 
 class KeyPair
 {
-    private:
-        int l; // dimension of the vectors, key length
-        Integer p; // safe prime
-        Integer g; // generator of the quadratic residue subgroup
-        vector<Integer> publicKey;
-        vector<Integer> privateKey;
+private:
+    MasterPublicKey mpk;
+    MasterSecretKey msk;
+    int length;
 
-    public:
-        //constructors
-        KeyPair(int length, int bits);
-        KeyPair(int length, int bits, Integer p1); //if we already have a safe prime found, we can use it again
-        
-        //destructor
-        ~KeyPair();
+public:
+    KeyPair(int length, int bits, Integer p);
+    KeyPair(int length, int bits);
 
-        int getLength() const;
-        const Integer& getSafePrime() const;
-        const Integer& getGenerator() const;
-        const vector<Integer>& getPublicKey() const;
-        const vector<Integer>& getPrivateKey() const;
-        Integer getSubPrime() const;
-    
+    const MasterPublicKey &getMasterPublicKey() const;
+
+    const MasterSecretKey &getMasterSecretKey() const;
+
+    int getLength() const;
 };
+
+
+#endif //IP2_KEYPAIR_H

@@ -127,14 +127,16 @@ Integer babyStepGiantStep(const Integer& alpha, const Integer& beta, const Integ
      */
 
     Integer m = Integer(bound.SquareRoot() + 1);
-
+//    cout << "alpha = " << alpha << endl;
+//    cout << "beta = " << beta << endl;
+//    cout << "p = " << p << endl;
     // map for the baby steps
     map<Integer, Integer> T;
 
     // fill the map
     Integer alpha_j = Integer(1);
 
-    for (unsigned long int j = 0; j < m; j++)
+    for (long long int j = 0; j < m; j++)
     {
         T[alpha_j] = Integer(j);
         alpha_j = a_times_b_mod_c(alpha_j, alpha, p);
@@ -146,19 +148,19 @@ Integer babyStepGiantStep(const Integer& alpha, const Integer& beta, const Integ
 
     // Giant step calculation
     Integer gamma = Integer(beta);
-    for (unsigned long int i = 0; i < m; i++)
+    for (long long int i = 0; i < m; i++)
     {
         // Check if gamma is in the baby steps map
         // cout << gamma << endl;
-        if (T.count(gamma) == 1)
+        if (T.count(gamma) > 0)
         {
             // Solution found! return it
             // return Integer((i * m) + T[gamma]);
-            return Integer(a_times_b_mod_c(Integer(i), m, p) + T[gamma]).Modulo(p);
+            //return Integer(a_times_b_mod_c(Integer(i), m, p) + T[gamma]).Modulo(p);
+            return Integer(T.at(gamma) + (i * m));
         }
 
         // Move to the next giant step
-        // gamma = (gamma * interm) % p;
         gamma = a_times_b_mod_c(gamma, interm, p);
     }
 
@@ -187,7 +189,8 @@ bool isProbablePrime(const Integer& n, int k)
     // before proceeding to the M-R test
     // check if the candidate is divisible by the first few primes
     int fewPrimes[] = {2, 3, 5, 7, 11, 13, 17, 19,\
-     23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97};
+     23, 29, 31, 37, 41, 43, 47, 53, 59, \
+     61, 67, 71, 73, 79, 83, 89, 97};
 
     for(int i = 0; i < sizeof(fewPrimes) / sizeof(fewPrimes[0]); i++)
     {
@@ -197,7 +200,7 @@ bool isProbablePrime(const Integer& n, int k)
         }
     }
 
-    // Find r, d such taht n - 1 = (2^r * d) for d odd 
+    // Find r, d such that n - 1 = (2^r * d) for d odd
     Integer d = n - 1;
     int r = 0;
     
@@ -237,4 +240,32 @@ bool isProbablePrime(const Integer& n, int k)
     }
 
     return true;
+}
+
+bool isVectorInBound(vector<Integer> vec, unsigned long long int bound)
+{
+    for(int i = 0; i < vec.size(); i++)
+    {
+        if(vec[i] >= bound)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+Integer scalarProduct(vector<Integer> v1, vector<Integer> v2)
+{
+    if(v1.size() != v2.size())
+    {
+        throw invalid_argument("Cannot compute scalar product of vectors of different sizes!");
+    }
+    Integer s = 0;
+
+    for(int i = 0; i < v1.size(); i++)
+    {
+        s = s + v1[i] * v2[i];
+    }
+    return s;
+
 }
