@@ -6,13 +6,10 @@
 #include <crypto++/nbtheory.h>
 #include <crypto++/integer.h>
 #include <crypto++/osrng.h>
+#include <cryptopp/rng.h>
+
 #include <sodium.h>
 #include <sstream>
-
-// ##include "cryptoapp/hrtimer.h"
-
-// #include "cryptopp/modes.h"
-// #include "cryptopp/filters.h"
 
 #include "KeyPair.h"
 #include "my_utilities.h"
@@ -65,7 +62,6 @@ Integer generateCryptoSecureRandomInteger(int bits)
     }
 
     // Generate random bytes
-    // AutoSeededRandomPool rng;
     SecByteBlock bytes(bits / 8 + 1);
     rng.GenerateBlock(bytes, bytes.size());
 
@@ -110,6 +106,8 @@ Integer generatorOfQuadraticResidues(const Integer& p)
     while(true)
     {
         Integer root = mersenneTwister(bnd);
+
+        //g = root^2 which is a quad. residue
         Integer g = a_times_b_mod_c(root, root, p);
 
         if(g % p != 1)
@@ -127,10 +125,6 @@ Integer babyStepGiantStep(const Integer& alpha, const Integer& beta, const Integ
      */
 
     Integer m = Integer(bound.SquareRoot() + 1);
-//    cout << "alpha = " << alpha << endl;
-//    cout << "beta = " << beta << endl;
-//    cout << "p = " << p << endl;
-    // map for the baby steps
     map<Integer, Integer> T;
 
     // fill the map
@@ -141,6 +135,7 @@ Integer babyStepGiantStep(const Integer& alpha, const Integer& beta, const Integ
         T[alpha_j] = Integer(j);
         alpha_j = a_times_b_mod_c(alpha_j, alpha, p);
     }
+    //cout << "hashmap constructed!" << endl;
 
     // Setting interm = alpha^(-m) (mod p)
     Integer interm = Integer(alpha.InverseMod(p));
@@ -151,12 +146,9 @@ Integer babyStepGiantStep(const Integer& alpha, const Integer& beta, const Integ
     for (long long int i = 0; i < m; i++)
     {
         // Check if gamma is in the baby steps map
-        // cout << gamma << endl;
         if (T.count(gamma) > 0)
         {
             // Solution found! return it
-            // return Integer((i * m) + T[gamma]);
-            //return Integer(a_times_b_mod_c(Integer(i), m, p) + T[gamma]).Modulo(p);
             return Integer(T.at(gamma) + (i * m));
         }
 
@@ -220,11 +212,13 @@ bool isProbablePrime(const Integer& n, int k)
             continue;
 
         bool composite = true;
-        for(int j = 0; j < r - 1; ++j) 
+        for(int j = 0; j < r - 1; j++)
         {
             Integer y = a_times_b_mod_c(x, x, n);
             if(y == 1)
+            {
                 return false;
+            }
 
             if(y == n - 1) 
             {
@@ -233,7 +227,7 @@ bool isProbablePrime(const Integer& n, int k)
             }
         }
 
-        if(composite)
+        if(composite == true)
         {
             return false;
         }
@@ -244,10 +238,12 @@ bool isProbablePrime(const Integer& n, int k)
 
 bool isVectorInBound(vector<Integer> vec, unsigned long long int bound)
 {
-    for(int i = 0; i < vec.size(); i++)
+    for(long long int i = 0; i < vec.size(); i++)
     {
-        if(vec[i] >= bound)
+        if(vec[i] > bound)
         {
+            cout << "vec[" << i <<"] = " << vec[i] << "; ";
+            cout << "bound = " << bound << endl;
             return false;
         }
     }
@@ -268,4 +264,13 @@ Integer scalarProduct(vector<Integer> v1, vector<Integer> v2)
     }
     return s;
 
+}
+vector<Integer> randomIntegerVector(long long int size, long long int upperBound)
+{
+    vector<Integer> vec;
+    for(long long int i = 0; i < size; i++)
+    {
+        vec.push_back(Integer(rng, 3, upperBound));
+    }
+    return vec;
 }

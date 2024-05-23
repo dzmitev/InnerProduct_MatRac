@@ -2,16 +2,9 @@
 
 #pragma once
 
-#include <iostream>
-//#include <iomanip>
-//#include <bitset>
 #include <vector>
-//#include <random>
-//#include <crypto++/nbtheory.h>
-//#include <crypto++/integer.h>
-//#include <crypto++/osrng.h>
-//#include <sodium.h>
-//#include <sstream>
+#include <crypto++/integer.h>
+
 
 using namespace std;
 using namespace CryptoPP;
@@ -29,6 +22,7 @@ class MasterSecretKey
         MasterSecretKey(vector<Integer>);
         MasterSecretKey();
         //destructor
+        // not needed -- nothing is allocated dynamically
         //~MasterSecretKey();
 
     public:

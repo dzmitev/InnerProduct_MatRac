@@ -1,19 +1,6 @@
-// MasterPublicKey.cpp
-
 #include <iostream>
 #include <crypto++/integer.h>
 #include <vector>
-//#include <iomanip>
-//#include <bitset>
-//#include <random>
-//#include <crypto++/nbtheory.h>
-//
-//#include <crypto++/osrng.h>
-//#include <sodium.h>
-//#include <sstream>
-
-//#include "KeyPair.h"
-//#include "my_utilities.h"
 #include "MasterPublicKey.h"
 
 using namespace std;

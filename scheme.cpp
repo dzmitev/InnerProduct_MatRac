@@ -1,20 +1,8 @@
 #include <iostream>
-//#include <iomanip>
-//#include <bitset>
 #include <vector>
-//#include <random>
-//#include <crypto++/nbtheory.h>
 #include <crypto++/integer.h>
 #include <crypto++/osrng.h>
-//#include <sodium.h>
-//#include <sstream>
-//#include <numeric>
-//
-//// ##include "cryptoapp/hrtimer.h"
-//
-//// #include "cryptopp/modes.h"
-//// #include "cryptopp/filters.h"
-
+#include <optional>
 #include "KeyPair.h"
 #include "MasterSecretKey.h"
 #include "MasterPublicKey.h"
@@ -26,55 +14,56 @@ using namespace CryptoPP;
 // mt19937_64 gen(rd());
 // AutoSeededRandomPool rng;
 
-
-KeyPair setup(int l, int bits, long long int B)
+KeyPair setup(int l, int bits, long long int B, const optional<Integer>& p = nullopt)
 {
     // bits -- number of bits of the safe prime
     // B -- upper bound on the elements of the vector
     // l -- dimension of the vector
-     
 
     // Make sure that bits > 0, B > 0, l > 0
     if (bits <= 0)
     {
-        // cerr << "Number of bits must be positive!" <<endl;
-        // return Integer::Zero();
-        throw invalid_argument("Number of bits must be positive");
+        throw std::invalid_argument("Number of bits must be positive");
     }
-    //cout << "bit check passed" << endl;
 
     if (B <= 0)
     {
-        // cerr << "The bound B must be positive!" <<endl;
-        // return Integer::Zero();
-        throw invalid_argument("The bound B must be positive");
+        throw std::invalid_argument("The bound B must be positive");
     }
-    //cout << "B check passed" << endl;
 
     if (l <= 0)
     {
-        // cerr << "The dimension l must be positive!" <<endl;
-        // return Integer::Zero();
-        throw invalid_argument("The dimension l must be positive");
+        throw std::invalid_argument("The dimension l must be positive");
     }
-    //cout << "l check passed" << endl;
 
-    KeyPair key(l, bits);
-    //cout << "key generated for l = " << l << " and bits = " << bits << endl;
-    //Integer q = (key.getMasterPublicKey()).getSubPrime();
-    //MasterPublicKey mpk1 = key.getMasterPublicKey();
-    //MasterSecretKey msk1 = key.getMasterSecretKey();
 
-    Integer q = key.getMasterPublicKey().getSubPrime();
-    //cout << "in if " << endl;
-    if(l * B * B >= q)
+    // Check if p is provided
+    if(p.has_value() == true)
     {
-        throw invalid_argument\
-            ("l * B * B >= q! You need a larger prime or a smaller bound!");
+        // Call KeyPair constructor with p
+        KeyPair key(l, bits, p.value());
+        Integer q = key.getMasterPublicKey().getSubPrime();
+
+        if (l * B * B >= q)
+        {
+            throw invalid_argument("l * B * B >= q! You need a larger prime or a smaller bound!");
+        }
+        return key;
     }
-    //cout << "before return "<<endl;
-    return key;
+    else
+    {
+        // No prime p provided, call KeyPair constructor without p
+        KeyPair key(l, bits);
+        Integer q = key.getMasterPublicKey().getSubPrime();
+
+        if (l * B * B >= q)
+        {
+            throw invalid_argument("l * B * B >= q! You need a larger prime or a smaller bound!");
+        }
+        return key;
+    }
 }
+
 
 vector<Integer> encrypt(MasterPublicKey mpk, vector<Integer> plaintext, long long int B)
 {
@@ -147,8 +136,7 @@ Integer decrypt(MasterPublicKey mpk, vector<Integer> ciphertext, vector<Integer>
     Integer p = mpk.getSafePrime();
     Integer q = mpk.getSubPrime();
 
-    // caluclate the product
-    // prod = (ct_1 ^ y_1 * ... * ct_l ^ y_l) / ct_0^(sk_y)
+    // caluclate the product prod = (ct_1 ^ y_1 * ... * ct_l ^ y_l) * ct_0^(-sk_y)
 
     //denomInvese is the inverse of the denominator, i.e. denomInverse = ct_0^(-sk_y)
     Integer denomInverse = a_exp_b_mod_c(ciphertext[0], sk_y, p);
@@ -170,38 +158,9 @@ Integer decrypt(MasterPublicKey mpk, vector<Integer> ciphertext, vector<Integer>
     return disc_log;
 }
 
-//
+
 int main()
 {
-
-//    KeyPair key = setup(3, 32, 10000); //length, bits, bound
-//    MasterPublicKey pk = key.getMasterPublicKey();
-//    MasterSecretKey sk = key.getMasterSecretKey();
-//    vector<Integer> pt = {10, 10, 10};
-//    int B = 10000;
-//    vector<Integer> ct = encrypt(pk, pt, B);
-//    vector<Integer> y = {1, 1, 1};
-//    Integer sk_y = keygen(key, y, B);
-//
-//    for(int i = 0; i < ct.size(); i++)
-//    {
-//        cout <<"ct["<<i<<"] = "<< ct[i] <<" ";
-//    }
-//    cout<<endl;
-//
-//    for(int i = 0; i < y.size(); i++)
-//    {
-//        cout <<"y["<<i<<"] = "<< y[i] <<" ";
-//    }
-//    cout<<endl;
-//
-//    cout << sk_y << endl;
-//    //cout << "bits for prime: " << (key.getSafePrime()).BitCount() << endl;
-//    //cout << "safePrime = " << key.getMasterPublicKey().getSafePrime() << endl;
-//    //cout << "subPrime  = " << key.getMasterPublicKey().getSubPrime() << endl;
-//    //key.getMasterSecretKey().printPrivateKey();
-//    //key.getMasterPublicKey().printPublicKey();
-
     vector<Integer> grades = {8, 7,  9, 6, 10, 6, 7, 9, 6, 8, \
           7, 10, 8, 9, 8, 8, 9, 9, 7, 9, \
           7, 9 , 8, 10, 8, 7, 7, 9, 9, 10};
@@ -209,21 +168,26 @@ int main()
     vector<Integer> ects = {7, 7, 6, 6, 10, 5, 7, 7, 5, 5, 7, 10, \
         6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, \
         3,3,3,3};
-    int l = grades.size();
-    int B = 11; // we assume that every subject is worth at most 10 ECTS
-    int bits = 128;
 
+
+    //int l = grades.size();
+    int B = 10000; // we assume that every subject is worth at most 10 ECTS
+    int bits = 1024;
+    int l = 100;
+    vector<Integer> plaintextVec = randomIntegerVector(l, B);
+    vector<Integer> keyVec = randomIntegerVector(l, B);
+
+    Integer p1("136607070847329078202190522504350756341844973016949670397906556513586960612188818280604150245997995440972736560804417244040369560156029916789431171583879198790487519180250259136321970832683028539422904064797240421435541885698081957638584796566250762491993938886264096354704395440135477295514059359739396691483");
     KeyPair key = setup(l, bits, B);
     MasterPublicKey pk = key.getMasterPublicKey();
     MasterSecretKey sk = key.getMasterSecretKey();
 
-    vector<Integer> Ct = encrypt(pk, grades, B);
-    Integer sk_ects = keygen(key, ects, B);
-    Integer decValue = decrypt(pk, Ct, ects, sk_ects, B);
+    vector<Integer> Ct = encrypt(pk, plaintextVec, B);
+    Integer sk_keyVec = keygen(key, keyVec, B);
+    Integer decValue = decrypt(pk, Ct, keyVec, sk_keyVec, B);
 
-    Integer innerProd = scalarProduct(grades, ects);
-    //cout << "innerProd = " << innerProd << endl;
-    //cout<<babyStepGiantStep(5, 45, 131, 130);
+    Integer innerProd = scalarProduct(plaintextVec, keyVec);
+    cout<< "innerProd = " << innerProd <<endl;
     cout << "decValue = " << decValue << endl;
 
 
