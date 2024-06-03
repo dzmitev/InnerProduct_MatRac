@@ -8,7 +8,7 @@ g++ scheme.cpp MasterSecretKey.cpp MasterPublicKey.cpp KeyPair.cpp  my_utilities
 
 ./a.out
 
-For Windows users, the ouput file should be a.exe instead.
+For Windows users, the ouput file should be "a.exe" instead of "a.out".
 
 The function "main" is located in "scheme.cpp", which is run. The scheme was tested on a popOS, which is a Ubuntu-based distribution, and works correctly.
 
