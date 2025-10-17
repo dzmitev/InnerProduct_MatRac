@@ -15,5 +15,3 @@ The function "main" is located in "scheme.cpp", which is run. The scheme was tes
 In the "experimental_results" folder one may find the measured execution times of the four main algorithms.
 
 In the "generate_safe_prime" folder one may find the time needed for generating a 1024, 2048 and 4096-bit safe prime number along with a source code on how the tests were conducted.
-
-In "intermediete_and_final_reports" one may find, as the name suggests, the reports we were supposed to upload: the intermediete and final report. Additionally, a file "ExperimentalResults.pdf" can be found in which the results are commented.
